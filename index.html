@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+   <meta charset="UTF-8">
+   <script type="module" src="https://js.arcgis.com/5.1/embeddable-components/"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pacific Flyway Bird Migration</title>
   <meta name="description" content="A capstone project mapping spring bird migration using eBird abundance, BirdFlow routes, and weather radar.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -149,11 +150,16 @@
              pasting your link in place of YOUR_ARCGIS_LINK.
         -->
         <!-- <iframe src="https://arcg.is/18Lvi01" title="Bird migration map" allowfullscreen loading="lazy"></iframe> -->
-        <div class="map-placeholder">
-          <strong>ArcGIS map goes here</strong>
-          <p>Paste your ArcGIS Online embed link into <code>index.html</code> (see the note in the code).</p>
-        </div>
-      </div>
+       <arcgis-embedded-map
+  style="height:600px; width:100%;"
+  item-id="6f61ed93ba7c4ded840346a9a78b04ce"
+  theme="light"
+  time-zone-label-enabled
+  center="-117.071969,36.42070600000001"
+  scale="4622324.434309"
+  portal-url="https://sdsugeo.maps.arcgis.com">
+</arcgis-embedded-map>
+       </div>
 
       <div class="live-link">
         <div>
