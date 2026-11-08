@@ -165,8 +165,13 @@
     .sp-tile{position:relative; aspect-ratio:1/1; background:var(--sp-tile); overflow:hidden; margin:0}
     .sp-tile img{width:100%; height:100%; object-fit:cover; display:block; transition:transform .35s ease; color:transparent}
     .sp-tile.sp-map img{object-fit:contain; background:#fff}
-    .sp-media:hover .sp-tile img{transform:scale(1.04)}
-    .sp-tile.sp-map:hover img{transform:none}
+    .sp-tile{transition:transform .3s ease, box-shadow .3s ease}
+    .sp-tile:nth-of-type(1){transform-origin:top left}
+    .sp-tile:nth-of-type(2){transform-origin:top right}
+    .sp-tile:nth-of-type(3){transform-origin:bottom left}
+    .sp-tile:nth-of-type(4){transform-origin:bottom right}
+    .sp-tile:hover{transform:scale(2); z-index:3; box-shadow:0 6px 20px rgba(0,0,0,.25)}
+    .sp-tile:hover figcaption{transform:scale(.5); transform-origin:bottom left}
     .sp-tile figcaption{
       position:absolute; left:6px; bottom:6px; font-size:11px; font-weight:600; letter-spacing:.04em;
       text-transform:uppercase; color:#fff; background:rgba(20,30,30,.68); padding:3px 7px; border-radius:4px;
@@ -177,7 +182,7 @@
     }
     .sp-tile a.sp-ext:hover{text-decoration:underline}
     .sp-playing{
-      position:absolute; top:8px; right:8px; z-index:2; font-size:12px; padding:3px 8px; border-radius:999px;
+      position:absolute; top:8px; right:8px; z-index:5; font-size:12px; padding:3px 8px; border-radius:999px;
       background:rgba(255,255,255,.92); color:var(--sp-ink); opacity:0; transition:opacity .2s; pointer-events:none;
     }
     .sp-card.is-playing .sp-playing{opacity:1}
