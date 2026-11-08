@@ -140,6 +140,241 @@
       <h2>Interactive migration map</h2>
       <p class="section-intro">Explore modeled migration routes and seasonal abundance. Use the map's layer list and time controls to compare species and weeks.</p>
 
+<!-- ===================== SPECIES CARDS SECTION =====================
+     Paste this whole block just ABOVE the "Interactive migration map" section.
+     Everything (styles + script) is scoped to #species so it won't affect the rest of the site.
+     To change a photo, sound or stat, edit the SPECIES list in the <script> at the bottom.
+     ================================================================== -->
+<section id="species" class="sp-section" aria-labelledby="sp-heading">
+  <style>
+    .sp-section{
+      --sp-ink:#1f2d2e; --sp-muted:#5b6566; --sp-accent:#2f6f6f;
+      --sp-card:#ffffff; --sp-line:#e3e1da; --sp-tile:#ecebe5;
+      max-width:1040px; margin:0 auto; padding:56px 16px 24px; color:var(--sp-ink);
+    }
+    .sp-section h2{margin:0 0 10px; font-family:inherit}
+    .sp-intro{max-width:720px; color:var(--sp-muted); line-height:1.6; margin:0 0 14px}
+    .sp-sound-toggle{
+      display:inline-flex; align-items:center; gap:8px; margin:0 0 26px;
+      font:inherit; font-size:14px; padding:8px 14px; border-radius:999px; cursor:pointer;
+      border:1px solid var(--sp-line); background:var(--sp-card); color:var(--sp-ink);
+    }
+    .sp-sound-toggle[aria-pressed="true"]{background:var(--sp-accent); border-color:var(--sp-accent); color:#fff}
+    .sp-grid{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:20px}
+    @media (max-width:900px){.sp-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media (max-width:580px){.sp-grid{grid-template-columns:1fr}}
+
+    .sp-card{background:var(--sp-card); border:1px solid var(--sp-line); border-radius:12px; overflow:hidden; display:flex; flex-direction:column}
+    .sp-media{display:grid; grid-template-columns:1fr 1fr; gap:2px; background:var(--sp-line); position:relative}
+    .sp-tile{position:relative; aspect-ratio:1/1; background:var(--sp-tile); overflow:hidden; margin:0}
+    .sp-tile img{width:100%; height:100%; object-fit:cover; display:block; transition:transform .35s ease; color:transparent}
+    .sp-tile.sp-map img{object-fit:contain; background:#fff}
+    .sp-media:hover .sp-tile img{transform:scale(1.04)}
+    .sp-tile.sp-map:hover img{transform:none}
+    .sp-tile figcaption{
+      position:absolute; left:6px; bottom:6px; font-size:11px; font-weight:600; letter-spacing:.04em;
+      text-transform:uppercase; color:#fff; background:rgba(20,30,30,.68); padding:3px 7px; border-radius:4px;
+    }
+    .sp-tile a.sp-ext{
+      position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;
+      gap:4px; text-align:center; padding:10px; font-size:13px; color:var(--sp-accent); text-decoration:none;
+    }
+    .sp-tile a.sp-ext:hover{text-decoration:underline}
+    .sp-playing{
+      position:absolute; top:8px; right:8px; z-index:2; font-size:12px; padding:3px 8px; border-radius:999px;
+      background:rgba(255,255,255,.92); color:var(--sp-ink); opacity:0; transition:opacity .2s; pointer-events:none;
+    }
+    .sp-card.is-playing .sp-playing{opacity:1}
+
+    .sp-body{padding:16px 16px 14px; display:flex; flex-direction:column; gap:10px; flex:1}
+    .sp-name{margin:0; font-size:20px; line-height:1.2}
+    .sp-sci{margin:2px 0 0; font-style:italic; color:var(--sp-muted); font-size:14px}
+    .sp-stats{margin:0; display:grid; grid-template-columns:auto 1fr; gap:4px 12px; font-size:14px; line-height:1.4}
+    .sp-stats dt{color:var(--sp-muted)}
+    .sp-stats dd{margin:0}
+    .sp-note{margin:0; font-size:14px; line-height:1.5; color:var(--sp-muted)}
+    .sp-links{margin-top:auto; font-size:13px}
+    .sp-links a{color:var(--sp-accent)}
+    .sp-credits{font-size:12px; color:var(--sp-muted)}
+    .sp-credits summary{cursor:pointer}
+    .sp-credits ul{margin:6px 0 0; padding-left:16px; line-height:1.45}
+    .sp-credits a{color:inherit}
+  </style>
+
+  <h2 id="sp-heading">Meet the six species</h2>
+  <p class="sp-intro">Each card shows the adult male, adult female, a juvenile, and the bird's range and migration path. Hover over the photos to hear the bird.</p>
+  <button type="button" class="sp-sound-toggle" aria-pressed="false">🔈 Turn on bird sounds</button>
+
+  <div class="sp-grid" id="sp-grid"></div>
+
+  <script>
+  (function () {
+    // Commons file name -> hotlinkable image/audio URL (Commons serves a resized copy).
+    function commons(file, width) {
+      var u = "https://commons.wikimedia.org/wiki/Special:FilePath/" + encodeURIComponent(file);
+      return width ? u + "?width=" + width : u;
+    }
+    function page(file) { return "https://commons.wikimedia.org/wiki/File:" + encodeURIComponent(file); }
+
+    // ---- EDIT HERE ----------------------------------------------------------
+    // Each image: { file: "<Commons file name>" }  OR  { src: "images/your-file.jpg" }
+    //   OR { link: "<url>" } to show a "view photo" tile when the photo can't be hosted yet.
+    // sound: { file: "<Commons .mp3>" } or { src: "audio/your-file.mp3" } or null.
+    var SPECIES = [
+      {
+        name: "Western Tanager", sci: "Piranga ludoviciana",
+        male:     { file: "Western_Tanager_Singing_-_Piranga_ludoviciana_(27987567185).jpg", credit: "NPS / Jacob W. Frank", license: "Public domain" },
+        female:   { file: "Western_Tanager_(female)_(14016354666).jpg", credit: "Mike's Birds (Flickr)", license: "CC BY-SA 2.0" },
+        juvenile: { link: "https://www.inaturalist.org/observations/89634914", credit: "noverholtz (iNaturalist)", license: "CC BY-SA" },
+        flyway:   { file: "Migration_route_western_tanager.gif", label: "Migration route", credit: "Frederick C. Lincoln / USFWS", license: "Public domain" },
+        sound:    { file: "Piranga_ludoviciana_-_Western_Tanager_XC254618.mp3", credit: "Jonathon Jongsma (xeno-canto XC254618)", license: "CC BY-SA 4.0" },
+        stats: { "Length": "about 7 in (18 cm)", "Breeds": "Conifer forests of the West, north to Alaska and the Northwest Territories", "Winters": "Mexico and Central America" },
+        note: "One of the longest-distance songbird migrants in western North American forests.",
+        audubon: "https://www.audubon.org/field-guide/bird/western-tanager"
+      },
+      {
+        name: "Lazuli Bunting", sci: "Passerina amoena",
+        male:     { file: "Lazuli_Bunting_(53135090925).jpg", credit: "USFWS Pacific", license: "Public domain" },
+        female:   { file: "Female_Lazuli_Bunting_(28520942093).jpg", credit: "Mike's Birds (Flickr)", license: "CC BY-SA 2.0" },
+        juvenile: { file: "Passerina_amoena_-_Enderby,_BC.jpg", credit: "Iwctoys", license: "CC BY-SA 3.0" },
+        flyway:   { file: "Passerina_amoena_map.svg", label: "Range map", credit: "Wikimedia Commons", license: "CC BY-SA 4.0" },
+        sound:    { file: "Yellowstone_sound_library_-_Lazuli_Bunting_-_001.mp3", credit: "NPS & MSU Acoustic Atlas", license: "Public domain" },
+        stats: { "Length": "about 5.5 in (14 cm)", "Breeds": "Brushy hillsides across the western U.S. and southwest Canada", "Winters": "Western Mexico" },
+        note: "Many stop partway south to molt in the monsoon-fed Southwest before finishing the trip.",
+        audubon: "https://www.audubon.org/field-guide/bird/lazuli-bunting"
+      },
+      {
+        name: "Cassin's Vireo", sci: "Vireo cassinii",
+        male:     { file: "Cassin's_Vireo_-_Oregon_-_USA_S4E6609_(22383413443).jpg", label: "Adult", credit: "Francesco Veronesi", license: "CC BY-SA 2.0" },
+        female:   { file: "Cassin's_Vireo_Las_Cruces.jpg", label: "Adult (sexes alike)", credit: "Chuck Homler", license: "CC BY-SA 4.0" },
+        juvenile: { file: "Birding_(20240619-FS-JC-001).jpg", label: "Chick", credit: "U.S. Forest Service, Region 5", license: "Public domain" },
+        flyway:   { file: "Vireo_cassinii_map.svg", label: "Range map", credit: "Wikimedia Commons", license: "CC BY-SA 4.0" },
+        sound:    { file: "Vireo_cassinii_-_Cassin's_Vireo_XC269951.mp3", credit: "Christopher Eliot (xeno-canto XC269951)", license: "CC BY-SA 4.0" },
+        stats: { "Length": "about 5.5 in (14 cm)", "Breeds": "Pacific Coast forests, British Columbia to Baja California", "Winters": "Western Mexico" },
+        note: "Males and females look nearly identical: gray head with bold white \"spectacles.\"",
+        audubon: "https://www.audubon.org/field-guide/bird/cassins-vireo"
+      },
+      {
+        name: "Golden-crowned Sparrow", sci: "Zonotrichia atricapilla",
+        male:     { file: "Golden-crowned_Sparrow_with_Crowberry_-_Zonotrichia_atricapilla_(20860132384).jpg", label: "Adult (breeding)", credit: "NPS / Jacob W. Frank", license: "Public domain" },
+        female:   { file: "Golden-crowned_Sparrow_(12979768903).jpg", label: "Adult (sexes alike)", credit: "Kristine Sowl / USFWS", license: "Public domain" },
+        juvenile: { file: "Golden-Crowned_Sparrow_(juvenile)_(23476039905).jpg", credit: "Melissa McMasters", license: "CC BY 2.0" },
+        flyway:   { file: "Zonotrichia_atricapilla_map.svg", label: "Range map", credit: "Wikimedia Commons", license: "CC BY-SA 4.0" },
+        sound:    null, // TODO: add a xeno-canto recording (check its license)
+        stats: { "Length": "about 7 in (18 cm)", "Breeds": "Alaska and western Canada", "Winters": "Pacific Coast, Oregon to Baja California" },
+        note: "A true Pacific Flyway bird: it breeds in the far north and spends winter in California gardens and chaparral.",
+        audubon: "https://www.audubon.org/field-guide/bird/golden-crowned-sparrow"
+      },
+      {
+        name: "Virginia's Warbler", sci: "Leiothlypis virginiae",
+        male:     { file: "VirginiasWarbler.jpg", credit: "Polinova", license: "CC BY-SA 4.0" },
+        female:   { file: "Female_Virgina's_Warbler.JPG", credit: "Sabine's Sunbird", license: "CC BY-SA 3.0" },
+        juvenile: { link: "https://www.inaturalist.org/observations/66490881", credit: "jellyturtle (iNaturalist)", license: "CC BY" },
+        flyway:   { file: "Oreothlypis_virginiae_map.svg", label: "Range map", credit: "Wikimedia Commons", license: "CC BY-SA 3.0" },
+        sound:    null, // TODO: add a xeno-canto recording (check its license)
+        stats: { "Length": "about 4.75 in (12 cm)", "Breeds": "Pinyon-juniper and oak scrub of the Great Basin and southern Rockies", "Winters": "Southwestern Mexico" },
+        note: "A small gray warbler with a yellow rump and a hidden chestnut crown patch.",
+        audubon: "https://www.audubon.org/field-guide/bird/virginias-warbler"
+      },
+      {
+        name: "Rufous Hummingbird", sci: "Selasphorus rufus",
+        male:     { file: "Male_Rufous_Hummingbird_(7172188464).jpg", credit: "USFWS", license: "Public domain" },
+        female:   { file: "USFWS_ribes_sanguineum_(26123508822).jpg", credit: "USFWS Pacific Region", license: "Public domain" },
+        juvenile: { file: "Rufous_Hummingbird_Nest_(54518083995).jpg", label: "Chicks", credit: "USFWS Pacific", license: "Public domain" },
+        flyway:   { file: "Selasphorus_rufus_map.svg", label: "Range map", credit: "Wikimedia Commons", license: "CC BY-SA 3.0" },
+        sound:    null, // TODO: add a xeno-canto recording (check its license)
+        stats: { "Length": "about 3.5 in (9 cm)", "Breeds": "Pacific Northwest to southern Alaska", "Winters": "Mexico" },
+        note: "Relative to its body size, one of the longest migrations of any bird: Alaska to Mexico and back in a loop.",
+        audubon: "https://www.audubon.org/field-guide/bird/rufous-hummingbird"
+      }
+    ];
+    // ------------------------------------------------------------------------
+
+    var DEFAULT_LABELS = { male: "Male", female: "Female", juvenile: "Juvenile", flyway: "Flyway" };
+    var soundOn = false, current = null;
+    var grid = document.getElementById("sp-grid");
+    var toggle = document.querySelector("#species .sp-sound-toggle");
+
+    function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+    function srcOf(m, w) { return m.src || (m.file ? commons(m.file, w) : null); }
+    function pageOf(m) { return m.page || (m.file ? page(m.file) : (m.link || m.src)); }
+
+    function tile(sp, key) {
+      var m = sp[key], label = m.label || DEFAULT_LABELS[key];
+      var isMap = key === "flyway";
+      var src = srcOf(m, isMap ? 700 : 500);
+      var inner = src
+        ? '<img loading="lazy" src="' + esc(src) + '" alt="' + esc(sp.name + " - " + label) + '">'
+        : '<a class="sp-ext" href="' + esc(m.link) + '" target="_blank" rel="noopener"><span>📷</span><span>View ' + esc(label.toLowerCase()) + ' photo</span><span>on iNaturalist ↗</span></a>';
+      return '<figure class="sp-tile' + (isMap ? " sp-map" : "") + '">' + inner + '<figcaption>' + esc(label) + '</figcaption></figure>';
+    }
+
+    function creditItem(what, m) {
+      if (!m) return "";
+      return '<li>' + esc(what) + ': <a href="' + esc(pageOf(m)) + '" target="_blank" rel="noopener">' + esc(m.credit) + '</a>, ' + esc(m.license) + '</li>';
+    }
+
+    SPECIES.forEach(function (sp) {
+      var card = document.createElement("article");
+      card.className = "sp-card";
+      var stats = Object.keys(sp.stats).map(function (k) { return "<dt>" + esc(k) + "</dt><dd>" + esc(sp.stats[k]) + "</dd>"; }).join("");
+      card.innerHTML =
+        '<div class="sp-media">' +
+          '<span class="sp-playing">' + (sp.sound ? "♪ Playing" : "Sound coming soon") + '</span>' +
+          tile(sp, "male") + tile(sp, "female") + tile(sp, "juvenile") + tile(sp, "flyway") +
+        '</div>' +
+        '<div class="sp-body">' +
+          '<div><h3 class="sp-name">' + esc(sp.name) + '</h3><p class="sp-sci">' + esc(sp.sci) + '</p></div>' +
+          '<dl class="sp-stats">' + stats + '</dl>' +
+          '<p class="sp-note">' + esc(sp.note) + '</p>' +
+          '<div class="sp-links"><a href="' + esc(sp.audubon) + '" target="_blank" rel="noopener">Climate outlook (Audubon) ↗</a></div>' +
+          '<details class="sp-credits"><summary>Photo &amp; sound credits</summary><ul>' +
+            creditItem(sp.male.label || "Male", sp.male) + creditItem(sp.female.label || "Female", sp.female) +
+            creditItem(sp.juvenile.label || "Juvenile", sp.juvenile) + creditItem(sp.flyway.label || "Map", sp.flyway) +
+            creditItem("Sound", sp.sound) +
+          '</ul></details>' +
+        '</div>';
+      grid.appendChild(card);
+
+      var media = card.querySelector(".sp-media");
+      var audio = sp.sound ? new Audio() : null;
+      if (audio) { audio.preload = "none"; audio.src = srcOf(sp.sound); }
+
+      function start() {
+        if (!soundOn) return;
+        card.classList.add("is-playing");
+        if (!audio) return;
+        if (current && current !== audio) { current.pause(); }
+        current = audio;
+        try { audio.currentTime = 0; } catch (e) {}
+        var p = audio.play(); if (p && p.catch) p.catch(function () {});
+      }
+      function stop() {
+        card.classList.remove("is-playing");
+        if (audio) audio.pause();
+      }
+      media.addEventListener("mouseenter", start);
+      media.addEventListener("mouseleave", stop);
+      // Touch screens have no hover: tap the photos to play / stop.
+      media.addEventListener("touchstart", function () {
+        if (!soundOn) return;
+        if (audio && !audio.paused) stop(); else start();
+      }, { passive: true });
+    });
+
+    // Browsers only allow sound after the visitor clicks something, so sound starts behind this switch.
+    toggle.addEventListener("click", function () {
+      soundOn = !soundOn;
+      toggle.setAttribute("aria-pressed", String(soundOn));
+      toggle.textContent = soundOn ? "🔊 Bird sounds on (hover a photo)" : "🔈 Turn on bird sounds";
+      if (!soundOn && current) current.pause();
+    });
+  })();
+  </script>
+</section>
+<!-- =================== END SPECIES CARDS SECTION =================== -->
+
+      
       <div class="map-frame">
         <!--
           TO ADD YOUR ARCGIS MAP:
