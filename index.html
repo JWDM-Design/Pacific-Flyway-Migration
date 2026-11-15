@@ -3,6 +3,7 @@
   <head>
    <meta charset="UTF-8">
    <script type="module" src="https://js.arcgis.com/5.1/embeddable-components/"></script>
+   <link rel="stylesheet" href="https://js.arcgis.com/5.1/esri/themes/light/main.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pacific Flyway Bird Migration</title>
   <meta name="description" content="A capstone project mapping spring bird migration using eBird abundance, BirdFlow routes, and weather radar.">
@@ -171,7 +172,7 @@
     .sp-tile:nth-of-type(3){transform-origin:bottom left}
     .sp-tile:nth-of-type(4){transform-origin:bottom right}
     .sp-tile:hover{transform:scale(1.5); z-index:3; box-shadow:0 6px 20px rgba(0,0,0,.25)}
-    .sp-tile:hover figcaption{transform:scale(.54); transform-origin:bottom left}
+    .sp-tile:hover figcaption{transform:scale(.67); transform-origin:bottom left}
     .sp-tile figcaption{
       position:absolute; left:6px; bottom:6px; font-size:11px; font-weight:600; letter-spacing:.04em;
       text-transform:uppercase; color:#fff; background:rgba(20,30,30,.68); padding:3px 7px; border-radius:4px;
@@ -378,28 +379,10 @@
  <section id="map">
     <div class="wrap">
       <h2>Interactive migration map</h2>
-      <p class="section-intro">Explore modeled migration routes and seasonal abundance. Use the map's layer list and time controls to compare species and weeks.</p>
+      <p class="section-intro">Where the birds go each spring. Pick a species, then drag the week slider or press play to watch 200 simulated birds per species move north. Arrows show each species' main corridor.</p>
   
-      <div class="map-frame">
-        <!--
-          TO ADD YOUR ARCGIS MAP:
-          1. In ArcGIS Online, open your web map (or StoryMap / Dashboard / Instant App).
-          2. Set sharing to "Everyone (public)".
-          3. Share > Embed in website > copy the link (the src="..." part).
-          4. Delete the <div class="map-placeholder"> block below and uncomment the <iframe>,
-             pasting your link in place of YOUR_ARCGIS_LINK.
-        -->
-        <!-- <iframe src="https://arcg.is/18Lvi01" title="Bird migration map" allowfullscreen loading="lazy"></iframe> -->
-       <arcgis-embedded-map
-  style="height:600px; width:100%;"
-  item-id="6f61ed93ba7c4ded840346a9a78b04ce"
-  theme="light"
-  time-zone-label-enabled
-  center="-117.071969,36.42070600000001"
-  scale="4622324.434309"
-  portal-url="https://sdsugeo.maps.arcgis.com">
-</arcgis-embedded-map>
-       </div>
+      <!-- Interactive BirdFlow map: built by flyway-map.js (settings at the top of that file), data in flyway-routes.json -->
+      <div id="flyway-map-app"></div>
 
       <div class="live-link">
         <div>
@@ -499,5 +482,6 @@
     </div>
   </footer>
 
+  <script type="module" src="flyway-map.js"></script>
 </body>
 </html>
